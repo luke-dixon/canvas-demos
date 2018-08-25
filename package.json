@@ -1,0 +1,19 @@
+{
+  "name": "canvas-demos",
+  "version": "0.0.1",
+  "description": "Some demos using the HTML5 canvas API for fun",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luke-dixon/canvas-demos.git"
+  },
+  "author": "Luke Dixon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/luke-dixon/canvas-demos/issues"
+  },
+  "homepage": "https://github.com/luke-dixon/canvas-demos#readme"
+}
