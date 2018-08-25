@@ -1,5 +1,34 @@
 window.onload = function () {
     const currentAnimationText = document.getElementById('currentAnimationText');
+    let animate = false;
+    let cancel = false;
+    let speed = 1;
+    let pegs = [];
+
+    /**
+     * Draws the scene.
+     *
+     * @param drawAdditional An optional function that draws anything extra
+     * after we've drawn everything else
+     */
+    const drawScene = function (drawAdditional) {
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Clear the scene
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Loop through the pegs and draw them
+        // Each peg's draw function draws the pegs also
+        pegs.forEach(function (peg) {
+            peg.draw(ctx);
+        });
+
+        if (typeof drawAdditional === 'function') {
+            drawAdditional(ctx);
+        }
+    };
+
     /**
      * This class represents a disk used in the Tower of Hanoi puzzle.
       */
@@ -33,10 +62,72 @@ window.onload = function () {
             this.disks = disks;
         }
 
-        moveTopDiskTo(otherPeg) {
+        moveTopDiskTo(otherPeg, finishedCallback) {
             const disk = this.disks.pop();
-            currentAnimationText.replaceChild(document.createTextNode('Moving ' + disk.color + ' from ' + this.name + ' to ' + otherPeg.name), currentAnimationText.lastChild);
-            otherPeg.pushDisk(disk);
+            if (!cancel) {
+                currentAnimationText.replaceChild(document.createTextNode('Moving ' + disk.color + ' disk from ' + this.name + ' to ' + otherPeg.name), currentAnimationText.lastChild);
+            }
+
+            let animationState = 'move-up';
+            animate = true;
+            const update = function () {
+                if (cancel) {
+                    // we've been cancelled, don't bother animating anything else
+                    otherPeg.pushDisk(disk);
+                    animate = false;
+                    finishedCallback();
+                    return;
+                }
+                if (animationState === 'move-up') {
+                    disk.yPos -= speed;
+                    if (disk.yPos <= 50) {
+                        disk.yPos = 50;
+                        // finished moving up, now move across
+                        animationState = 'move-across';
+                    }
+                } else if (animationState === 'move-across') {
+                    if (disk.xPos < otherPeg.xPos) {
+                        disk.xPos += speed;
+                    }
+                    if (disk.xPos > otherPeg.xPos) {
+                        disk.xPos -= speed;
+                    }
+                    if ((disk.xPos > (otherPeg.xPos - speed)) && (disk.xPos < (otherPeg.xPos + speed))) {
+                        disk.xPos = otherPeg.xPos;
+                        // finished moving across, now move down
+                        animationState = 'move-down';
+                    }
+                } else if (animationState === 'move-down') {
+                    let yPosTarget = 230;
+                    if (otherPeg.disks.length > 0) {
+                        yPosTarget = otherPeg.disks[otherPeg.disks.length - 1].yPos - 20;
+                    }
+                    if (disk.yPos < yPosTarget) {
+                        disk.yPos += speed;
+                    }
+                    if (disk.yPos >= yPosTarget) {
+                        // finished moving down, disk should be where it needs to be now
+                        disk.yPos = yPosTarget;
+                        animationState = 'finished';
+                    }
+                } else if (animationState === 'finished') {
+                    otherPeg.pushDisk(disk);
+                    animate = false;
+                    finishedCallback();
+                    return;
+                }
+
+                drawScene(function (ctx) {
+                    disk.draw(ctx);
+                });
+
+                if (animate) {
+                    window.requestAnimationFrame(update);
+                }
+            };
+            if (!cancel) {
+                window.requestAnimationFrame(update);
+            }
         }
 
         pushDisk(disk) {
@@ -72,8 +163,6 @@ window.onload = function () {
         }
     }
 
-    let pegs = [];
-
     /**
      * Sets up the pegs and disks. Also used to reset things.
      */
@@ -92,20 +181,15 @@ window.onload = function () {
     };
 
     /**
-     * Draws the scene.
+     * Animates the scene
      */
-    const draw = function () {
-        const canvas = document.getElementById('myCanvas');
-        const ctx = canvas.getContext('2d');
+    const animateScene = function (update) {
+        update();
+        drawScene();
 
-        // Clear the scene
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Loop through the pegs and draw them
-        // Each peg's draw function draws the pegs also
-        pegs.forEach(function (peg) {
-            peg.draw(ctx);
-        });
+        if (animate) {
+            window.requestAnimationFrame(animateScene.bind(null, update));
+        }
     };
 
     /**
@@ -122,10 +206,7 @@ window.onload = function () {
         if (numDisks >= 0) {
             solve(numDisks - 1, sourcePeg, sparePeg, targetPeg, tasks);
             tasks.push(function (callback) {
-                setTimeout(function () {
-                    sourcePeg.moveTopDiskTo(targetPeg);
-                    callback();
-                }, 500);
+                sourcePeg.moveTopDiskTo(targetPeg, callback);
             });
             solve(numDisks - 1, sparePeg, targetPeg, sourcePeg, tasks);
         }
@@ -150,12 +231,15 @@ window.onload = function () {
             const tasks = [];
             solve(pegs[0].disks.length - 1, pegs[0], pegs[2], pegs[1], tasks);
 
-            const callTask = function (index) {
+            const callTask = function (cancelled, index) {
                 if (tasks.length <= index) {
                     // we're finished now
-                    window.requestAnimationFrame(draw);
+                    window.requestAnimationFrame(drawScene);
                     animateButton.disabled = false;
                     currentAnimationText.replaceChild(document.createTextNode('All finished. Press reset to start over:'), currentAnimationText.lastChild);
+                    if (cancel) {
+                        cancel = false;
+                    }
                     return;
                 }
                 const task = tasks[index];
@@ -163,28 +247,38 @@ window.onload = function () {
                 // run the task
                 task(function () {
                     // run the next task when the current task finishes
-                    window.requestAnimationFrame(draw);
-                    callTask(index + 1);
+                    callTask(cancel, index + 1);
                 });
             };
 
             // call the next task
-            callTask(0);
+            callTask(cancel, 0);
         });
 
         const resetButton = document.getElementById('resetButton');
         resetButton.addEventListener('click', function () {
-            initializePegs();
-            animateButton.disabled = false;
+            cancel = true;
+            currentAnimationText.replaceChild(document.createTextNode('Resetting'), currentAnimationText.lastChild);
+            setTimeout(function () {
+                animateButton.disabled = false;
 
-            currentAnimationText.replaceChild(document.createTextNode('Press the Go button to begin:'), currentAnimationText.lastChild);
+                currentAnimationText.replaceChild(document.createTextNode('Press the Go button to begin:'), currentAnimationText.lastChild);
+                initializePegs();
 
-            // draw one frame after a reset
-            window.requestAnimationFrame(draw);
+                // draw one frame after a reset
+                window.requestAnimationFrame(drawScene);
+                cancel = false;
+            }, 1000);
         });
 
+        const speedSlider = document.getElementById('speedSlider');
+        speedSlider.oninput = function () {
+            speed = parseInt(speedSlider.value, 10);
+        };
+        speed = parseInt(speedSlider.value, 10);
+
         // draw one frame to begin with
-        window.requestAnimationFrame(draw);
+        window.requestAnimationFrame(drawScene);
     };
 
     initialize();
