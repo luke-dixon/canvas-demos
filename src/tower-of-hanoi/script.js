@@ -1,3 +1,5 @@
+import styles from './style.css';
+
 window.onload = function () {
     const currentAnimationText = document.getElementById('currentAnimationText');
     let animate = false;
