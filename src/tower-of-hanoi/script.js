@@ -62,6 +62,8 @@ window.onload = function () {
             this.xPos = xPosInitial;
             this.yPos = yPosInitial;
             this.disks = disks;
+            this.width = 40;
+            this.height = 130;
         }
 
         moveTopDiskTo(otherPeg, finishedCallback) {
@@ -150,13 +152,13 @@ window.onload = function () {
             ctx.moveTo(this.xPos, this.yPos);
             ctx.stroke();
             ctx.moveTo(this.xPos, this.yPos);
-            ctx.lineTo(this.xPos - 40, this.yPos);
+            ctx.lineTo(this.xPos - this.width, this.yPos);
             ctx.stroke();
             ctx.moveTo(this.xPos, this.yPos);
-            ctx.lineTo(this.xPos + 40, this.yPos);
+            ctx.lineTo(this.xPos + this.width, this.yPos);
             ctx.stroke();
             ctx.moveTo(this.xPos, this.yPos);
-            ctx.lineTo(this.xPos, this.yPos - 130);
+            ctx.lineTo(this.xPos, this.yPos - this.height);
             ctx.stroke();
 
             this.disks.forEach(function (disk) {
@@ -220,8 +222,6 @@ window.onload = function () {
     const initialize = function () {
         const canvas = document.getElementById('myCanvas');
         currentAnimationText.appendChild(document.createTextNode('Press the Go button to begin:'));
-        canvas.height = 300;
-        canvas.width = 600;
         initializePegs();
 
         const animateButton = document.getElementById('animateButton');
