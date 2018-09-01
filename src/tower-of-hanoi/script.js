@@ -1,3 +1,4 @@
+import {styles as baseStyles} from '../style.css';
 import styles from './style.css';
 
 window.onload = function () {
