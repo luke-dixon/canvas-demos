@@ -1,4 +1,4 @@
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+let HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     'entry': {
@@ -12,7 +12,23 @@ module.exports = {
         'rules': [
             {
                 'test': /\.css$/,
-                'use': ['style-loader', 'css-loader']
+                'use': [
+                    'style-loader',
+                    {
+                        'loader': 'css-loader',
+                        'options': { 'importLoaders': 1 }
+                    },
+                    {
+                        'loader': 'postcss-loader',
+                        'options': {
+                            'ident': 'postcss',
+                            'plugins': () => [
+                                require('postcss-import'),
+                                require('postcss-preset-env')
+                            ]
+                        }
+                    }
+                ]
             },
             {
                 'test': /\.js$/,

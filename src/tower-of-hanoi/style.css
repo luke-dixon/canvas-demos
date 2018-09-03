@@ -1,3 +1,5 @@
+@import "../style.css";
+
 #myCanvas {
     border: 3px solid var(--main-color);
     width: 100%;
