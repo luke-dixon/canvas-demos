@@ -1,0 +1,89 @@
+:root {
+    --background-color: white;
+    --main-color: rgb(63, 111, 139);
+    --text-color: black;
+    --disabled-color: gray(83);
+    --hover-color: rgb(125, 177, 247);
+    --visited-color: rgb(107, 82, 139);
+    --hover-visited-color: rgb(168, 129, 218);
+}
+
+/* Use box sizing (https://css-tricks.com/box-sizing/) */
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+
+body {
+    margin: 3px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+article {
+    font-family: sans-serif;
+    background-color: var(--background-color);
+}
+
+header {
+    color: var(--main-color);
+}
+
+button {
+    border: 1px solid var(--main-color);
+    padding: 1em 3em;
+    background-color: var(--background-color);
+    color: var(--main-color);
+    font-weight: bold;
+}
+
+button:disabled {
+    border: 1px solid var(--disabled-color);
+    padding: 1em 3em;
+    background-color: var(--background-color);
+    color: var(--disabled-color);
+}
+
+button:disabled:hover {
+    border: 1px solid var(--disabled-color);
+    padding: 1em 3em;
+    background-color: var(--background-color);
+    color: var(--disabled-color);
+}
+
+button:hover {
+    padding: 1em 3em;
+    background-color: var(--main-color);
+    color: var(--background-color);
+    border: 1px solid var(--main-color);
+}
+
+button:active {
+    padding: 1em 3em;
+    background-color: var(--main-color);
+    color: var(--background-color);
+    border: 1px solid var(--main-color);
+}
+
+button:focus {
+    padding: 1em 3em;
+    background-color: var(--main-color);
+    color: var(--background-color);
+    border: 1px solid var(--main-color);
+}
+
+a {
+    color: var(--main-color);
+}
+a:visited {
+    color: var(--visited-color);
+}
+a:hover {
+    color: var(--hover-color);
+}
+a:hover:visited {
+    color: var(--hover-visited-color);
+}

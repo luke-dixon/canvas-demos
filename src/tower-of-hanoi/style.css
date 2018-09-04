@@ -1,16 +1,56 @@
-body {
-    margin: 3px;
-}
+@import "../style.css";
 
 #myCanvas {
-    border: solid black 3px;
+    border: 3px solid var(--main-color);
     width: 100%;
-    width: calc(100% - 6px);
     height: 300px;
+}
+
+div.action-controls {
+    width: 100%;
+}
+div.action-controls > button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+div.speed-controls {
+}
+
+@media screen and (min-width: 228px) {
+    div.action-controls > button {
+        width: auto;
+    }
+}
+
+@media screen and (min-width: 475px) {
+    div.action-controls {
+        width: 50%;
+        float: left;
+    }
+    div.action-controls > button {
+        width: auto;
+        margin-bottom: 0;
+    }
+
+    div.speed-controls {
+        width: 50%;
+        float: left;
+    }
 }
 
 @media screen and (min-width: 606px) {
     #myCanvas {
         width: 600px;
+    }
+
+    div.action-controls {
+        width: 300px;
+        float: left;
+    }
+
+    div.speed-controls {
+        width: 300px;
+        float: left;
     }
 }
