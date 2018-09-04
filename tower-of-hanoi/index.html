@@ -14,15 +14,19 @@
 <canvas id="myCanvas" width="600" height="300"></canvas>
 </div>
     <div>
-        <p id="currentAnimationText"></p>
+        <p id="currentAnimationText" aria-live="polite"></p>
     </div>
 <div>
-    <button id="animateButton">Go</button>
-    <button id="resetButton">Reset</button>
-    <label for="speedSlider">Speed:</label>
-    <input id="speedSlider" type="range" min="1" max="10">
+    <div class="action-controls">
+        <button id="animateButton">Go</button>
+        <button id="resetButton">Reset</button>
+    </div>
+    <div class="speed-controls">
+        <label for="speedSlider">Speed:</label>
+        <input id="speedSlider" type="range" min="1" max="10">
+    </div>
 </div>
 </section>
 </article>
-<script type="text/javascript" src="../tower-of-hanoi.bundle.js?a9090d78511063245f29"></script></body>
+<script type="text/javascript" src="../tower-of-hanoi.bundle.js?e0a0c305734a5170e343"></script></body>
 </html>
