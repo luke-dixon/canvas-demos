@@ -23,11 +23,15 @@ window.onload = function () {
         // Loop through the pegs and draw them
         // Each peg's draw function draws the pegs also
         pegs.forEach(function (peg) {
+            ctx.save();
             peg.draw(ctx);
+            ctx.restore();
         });
 
         if (typeof drawAdditional === 'function') {
+            ctx.save();
             drawAdditional(ctx);
+            ctx.restore();
         }
     };
 
