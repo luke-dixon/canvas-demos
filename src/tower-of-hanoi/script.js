@@ -23,11 +23,15 @@ window.onload = function () {
         // Loop through the pegs and draw them
         // Each peg's draw function draws the pegs also
         pegs.forEach(function (peg) {
+            ctx.save();
             peg.draw(ctx);
+            ctx.restore();
         });
 
         if (typeof drawAdditional === 'function') {
+            ctx.save();
             drawAdditional(ctx);
+            ctx.restore();
         }
     };
 
@@ -160,6 +164,12 @@ window.onload = function () {
             ctx.moveTo(this.xPos, this.yPos);
             ctx.lineTo(this.xPos, this.yPos - this.height);
             ctx.stroke();
+
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.textAlign = 'center';
+            ctx.font = '24px sans-serif';
+            ctx.fillText(this.name, this.xPos, this.yPos + 35);
 
             this.disks.forEach(function (disk) {
                 disk.draw(ctx);
