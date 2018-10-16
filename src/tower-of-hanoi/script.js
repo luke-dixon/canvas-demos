@@ -161,6 +161,12 @@ window.onload = function () {
             ctx.lineTo(this.xPos, this.yPos - this.height);
             ctx.stroke();
 
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.textAlign = 'center';
+            ctx.font = '24px sans-serif';
+            ctx.fillText(this.name, this.xPos, this.yPos + 35);
+
             this.disks.forEach(function (disk) {
                 disk.draw(ctx);
             });
