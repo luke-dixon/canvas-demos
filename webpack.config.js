@@ -6,8 +6,14 @@ const postCssPresetEnv = require('postcss-preset-env');
 module.exports = {
     'devtool': 'inline-source-map',
     'entry': {
-        'home': './src/script.js',
-        'tower-of-hanoi': './src/tower-of-hanoi/script.js'
+        'home': [
+            '@babel/polyfill',
+            './src/script.js'
+        ],
+        'tower-of-hanoi': [
+            '@babel/polyfill',
+            './src/tower-of-hanoi/script.js'
+        ]
     },
     'mode': 'development',
     'module': {

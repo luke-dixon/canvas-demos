@@ -1,4 +1,6 @@
+import '@babel/polyfill';
 import {Disk} from './disk.js';
+import {solve} from './algorithm';
 import {styles} from './style.css'; // eslint-disable-line no-unused-vars
 
 window.onload = function () {
@@ -126,7 +128,7 @@ window.onload = function () {
             this.disks.push(disk);
             disk.xPos = this.xPos;
         }
-        
+
         draw(ctx) {
             ctx.beginPath();
             ctx.lineCap = 'square';
@@ -187,10 +189,10 @@ window.onload = function () {
             // call the algorithm to get the list of tasks
             // the tasks take a callback function that runs when it completes
             const tasks = [];
-            solve(pegs[0].disks.length - 1, pegs[0], pegs[2], pegs[1], tasks);
+            const gen = solve(pegs[0].disks.length, pegs[0], pegs[2], pegs[1], tasks);
 
-            const callTask = function (cancelled, index) {
-                if (tasks.length <= index) {
+            const callTask = function (cancelled, task) {
+                if (task.done) {
                     // we're finished now
                     window.requestAnimationFrame(drawScene);
                     animateButton.disabled = false;
@@ -200,17 +202,18 @@ window.onload = function () {
                     }
                     return;
                 }
-                const task = tasks[index];
+                if (task.value) {
+                    const fromPeg = task.value.source;
+                    const toPeg = task.value.target;
 
-                // run the task
-                task(function () {
-                    // run the next task when the current task finishes
-                    callTask(cancel, index + 1);
-                });
+                    fromPeg.moveTopDiskTo(toPeg, function () {
+                        callTask(cancel, gen.next());
+                    });
+                }
             };
 
             // call the next task
-            callTask(cancel, 0);
+            callTask(cancel, gen.next());
         });
 
         const resetButton = document.getElementById('resetButton');
