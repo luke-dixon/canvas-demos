@@ -1,6 +1,8 @@
 let HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
+    'mode': 'development',
+    'devtool': 'inline-source-map',
     'entry': {
         'home': './src/script.js',
         'tower-of-hanoi': './src/tower-of-hanoi/script.js'
