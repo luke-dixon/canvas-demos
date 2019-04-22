@@ -1,46 +1,57 @@
-let HtmlWebpackPlugin = require('html-webpack-plugin');
+/* eslint-env node */
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const postCssImport = require('postcss-import');
+const postCssPresetEnv = require('postcss-preset-env');
 
 module.exports = {
+    'devtool': 'inline-source-map',
     'entry': {
-        'home': './src/script.js',
-        'tower-of-hanoi': './src/tower-of-hanoi/script.js'
+        'home': [
+            '@babel/polyfill',
+            './src/script.js'
+        ],
+        'tower-of-hanoi': [
+            '@babel/polyfill',
+            './src/tower-of-hanoi/script.js'
+        ]
     },
-    'output': {
-        'filename': '[name].bundle.js'
-    },
+    'mode': 'development',
     'module': {
         'rules': [
             {
-                'test': /\.css$/,
+                'test': /\.css$/u,
                 'use': [
                     'style-loader',
                     {
                         'loader': 'css-loader',
-                        'options': { 'importLoaders': 1 }
+                        'options': {'importLoaders': 1}
                     },
                     {
                         'loader': 'postcss-loader',
                         'options': {
                             'ident': 'postcss',
                             'plugins': () => [
-                                require('postcss-import'),
-                                require('postcss-preset-env')
+                                postCssImport,
+                                postCssPresetEnv
                             ]
                         }
                     }
                 ]
             },
             {
-                'test': /\.js$/,
-                'exclude': /node_modules/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env']
+                'exclude': /node_modules/u,
+                'test': /\.js$/u,
+                'use': {
+                    'loader': 'babel-loader',
+                    'options': {
+                        'presets': ['@babel/preset-env']
                     }
                 }
             }
         ]
+    },
+    'output': {
+        'filename': '[name].bundle.js'
     },
     'plugins': [
         new HtmlWebpackPlugin({

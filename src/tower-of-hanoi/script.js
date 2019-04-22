@@ -1,4 +1,7 @@
-import styles from './style.css';
+import '@babel/polyfill';
+import {Disk} from './disk.js';
+import {solve} from './algorithm';
+import {styles} from './style.css'; // eslint-disable-line no-unused-vars
 
 window.onload = function () {
     const currentAnimationText = document.getElementById('currentAnimationText');
@@ -34,28 +37,6 @@ window.onload = function () {
             ctx.restore();
         }
     };
-
-    /**
-     * This class represents a disk used in the Tower of Hanoi puzzle.
-      */
-    class Disk {
-        constructor(xPosInitial, yPosInitial, width, color) {
-            this.xPos = xPosInitial;
-            this.yPos = yPosInitial;
-            this.width = width;
-            this.color = color
-        }
-
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = 15;
-            ctx.moveTo(this.xPos - (5 * this.width), this.yPos);
-            ctx.lineTo(this.xPos + (5 * this.width), this.yPos);
-            ctx.stroke();
-        }
-    }
 
     /**
      * This class represents a peg used in the Tower of Hanoi puzzle.
@@ -147,7 +128,7 @@ window.onload = function () {
             this.disks.push(disk);
             disk.xPos = this.xPos;
         }
-        
+
         draw(ctx) {
             ctx.beginPath();
             ctx.lineCap = 'square';
@@ -195,42 +176,9 @@ window.onload = function () {
     };
 
     /**
-     * Animates the scene
-     */
-    const animateScene = function (update) {
-        update();
-        drawScene();
-
-        if (animate) {
-            window.requestAnimationFrame(animateScene.bind(null, update));
-        }
-    };
-
-    /**
-     * Creates a list of functions that will solve the tower when executed
-     * sequentially.
-     *
-     * @param numDisks The number of disks the puzzle contains
-     * @param sourcePeg The peg we want to move disks from
-     * @param targetPeg The peg we want to move disks to
-     * @param sparePeg The peg we can use to move pegs to temporarily
-     * @param tasks An output list of functions
-     */
-    const solve = function (numDisks, sourcePeg, targetPeg, sparePeg, tasks) {
-        if (numDisks >= 0) {
-            solve(numDisks - 1, sourcePeg, sparePeg, targetPeg, tasks);
-            tasks.push(function (callback) {
-                sourcePeg.moveTopDiskTo(targetPeg, callback);
-            });
-            solve(numDisks - 1, sparePeg, targetPeg, sourcePeg, tasks);
-        }
-    };
-
-    /**
      * Set everything up such as event handlers and the canvas
      */
     const initialize = function () {
-        const canvas = document.getElementById('myCanvas');
         currentAnimationText.appendChild(document.createTextNode('Press the Go button to begin:'));
         initializePegs();
 
@@ -241,10 +189,10 @@ window.onload = function () {
             // call the algorithm to get the list of tasks
             // the tasks take a callback function that runs when it completes
             const tasks = [];
-            solve(pegs[0].disks.length - 1, pegs[0], pegs[2], pegs[1], tasks);
+            const gen = solve(pegs[0].disks.length, pegs[0], pegs[2], pegs[1], tasks);
 
-            const callTask = function (cancelled, index) {
-                if (tasks.length <= index) {
+            const callTask = function (cancelled, task) {
+                if (task.done) {
                     // we're finished now
                     window.requestAnimationFrame(drawScene);
                     animateButton.disabled = false;
@@ -254,17 +202,18 @@ window.onload = function () {
                     }
                     return;
                 }
-                const task = tasks[index];
+                if (task.value) {
+                    const fromPeg = task.value.source;
+                    const toPeg = task.value.target;
 
-                // run the task
-                task(function () {
-                    // run the next task when the current task finishes
-                    callTask(cancel, index + 1);
-                });
+                    fromPeg.moveTopDiskTo(toPeg, function () {
+                        callTask(cancel, gen.next());
+                    });
+                }
             };
 
             // call the next task
-            callTask(cancel, 0);
+            callTask(cancel, gen.next());
         });
 
         const resetButton = document.getElementById('resetButton');
