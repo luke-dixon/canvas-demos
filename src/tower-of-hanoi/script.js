@@ -1,5 +1,5 @@
 import {Disk} from './disk.js';
-import {styles} from './style.css';
+import {styles} from './style.css'; // eslint-disable-line no-unused-vars
 
 window.onload = function () {
     const currentAnimationText = document.getElementById('currentAnimationText');
@@ -174,42 +174,9 @@ window.onload = function () {
     };
 
     /**
-     * Animates the scene
-     */
-    const animateScene = function (update) {
-        update();
-        drawScene();
-
-        if (animate) {
-            window.requestAnimationFrame(animateScene.bind(null, update));
-        }
-    };
-
-    /**
-     * Creates a list of functions that will solve the tower when executed
-     * sequentially.
-     *
-     * @param numDisks The number of disks the puzzle contains
-     * @param sourcePeg The peg we want to move disks from
-     * @param targetPeg The peg we want to move disks to
-     * @param sparePeg The peg we can use to move pegs to temporarily
-     * @param tasks An output list of functions
-     */
-    const solve = function (numDisks, sourcePeg, targetPeg, sparePeg, tasks) {
-        if (numDisks >= 0) {
-            solve(numDisks - 1, sourcePeg, sparePeg, targetPeg, tasks);
-            tasks.push(function (callback) {
-                sourcePeg.moveTopDiskTo(targetPeg, callback);
-            });
-            solve(numDisks - 1, sparePeg, targetPeg, sourcePeg, tasks);
-        }
-    };
-
-    /**
      * Set everything up such as event handlers and the canvas
      */
     const initialize = function () {
-        const canvas = document.getElementById('myCanvas');
         currentAnimationText.appendChild(document.createTextNode('Press the Go button to begin:'));
         initializePegs();
 

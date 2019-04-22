@@ -1,6 +1,7 @@
+/* eslint-env node */
 // Karma configuration
 // Generated on Mon Apr 22 2019 17:20:48 GMT+0100 (BST)
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpackConfig = require('./webpack.config');
 
 module.exports = function(config) {
     config.set({
@@ -31,13 +32,13 @@ module.exports = function(config) {
         'exclude': [],
 
 
+        // list of files / patterns to load in the browser
+        'files': ['spec/**/*.spec.js'],
+
+
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         'frameworks': ['jasmine'],
-
-
-        // list of files / patterns to load in the browser
-        'files': ['spec/**/*.spec.js'],
 
 
         // level of logging
@@ -67,6 +68,7 @@ module.exports = function(config) {
         'singleRun': false,
 
 
-        'webpack': require('./webpack.config')
+        // WebPack configuration
+        'webpack': webpackConfig
     })
 };
