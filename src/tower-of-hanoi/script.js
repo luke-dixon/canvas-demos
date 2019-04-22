@@ -1,4 +1,5 @@
-import styles from './style.css';
+import {Disk} from './disk.js';
+import {styles} from './style.css';
 
 window.onload = function () {
     const currentAnimationText = document.getElementById('currentAnimationText');
@@ -34,28 +35,6 @@ window.onload = function () {
             ctx.restore();
         }
     };
-
-    /**
-     * This class represents a disk used in the Tower of Hanoi puzzle.
-      */
-    class Disk {
-        constructor(xPosInitial, yPosInitial, width, color) {
-            this.xPos = xPosInitial;
-            this.yPos = yPosInitial;
-            this.width = width;
-            this.color = color
-        }
-
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = 15;
-            ctx.moveTo(this.xPos - (5 * this.width), this.yPos);
-            ctx.lineTo(this.xPos + (5 * this.width), this.yPos);
-            ctx.stroke();
-        }
-    }
 
     /**
      * This class represents a peg used in the Tower of Hanoi puzzle.
