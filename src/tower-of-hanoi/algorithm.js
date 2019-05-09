@@ -8,28 +8,10 @@
  */
 export const solve = function *(numDisks, sourcePeg, targetPeg, sparePeg) {
     if (numDisks > 0) {
-        let gen = solve(numDisks - 1, sourcePeg, sparePeg, targetPeg);
-        while (true) {
-            const task = gen.next();
-            if (task.value) {
-                yield task.value;
-            }
-            if (task.done) {
-                break;
-            }
-        }
+        yield* solve(numDisks - 1, sourcePeg, sparePeg, targetPeg);
         yield {'action': 'move',
             'source': sourcePeg,
             'target': targetPeg};
-        gen = solve(numDisks - 1, sparePeg, targetPeg, sourcePeg);
-        while (true) {
-            const task = gen.next();
-            if (task.value) {
-                yield task.value;
-            }
-            if (task.done) {
-                break;
-            }
-        }
+        yield* solve(numDisks - 1, sparePeg, targetPeg, sourcePeg);
     }
 };
