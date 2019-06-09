@@ -1,4 +1,4 @@
-import '@babel/polyfill';
+import 'regenerator-runtime/runtime';
 import {Disk} from './disk.js';
 import {solve} from './algorithm';
 import {styles} from './style.css'; // eslint-disable-line no-unused-vars
