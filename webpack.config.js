@@ -6,12 +6,9 @@ const postCssPresetEnv = require('postcss-preset-env');
 module.exports = {
     'devtool': 'inline-source-map',
     'entry': {
-        'home': [
-            '@babel/polyfill',
-            './src/script.js'
-        ],
+        'home': ['./src/script.js'],
         'tower-of-hanoi': [
-            '@babel/polyfill',
+            'regenerator-runtime/runtime',
             './src/tower-of-hanoi/script.js'
         ]
     },
@@ -44,7 +41,16 @@ module.exports = {
                 'use': {
                     'loader': 'babel-loader',
                     'options': {
-                        'presets': ['@babel/preset-env']
+                        'presets': [
+                            [
+                                '@babel/preset-env',
+                                {
+                                    'corejs': 3,
+                                    'targets': 'defaults',
+                                    'useBuiltIns': 'entry'
+                                }
+                            ]
+                        ]
                     }
                 }
             }
