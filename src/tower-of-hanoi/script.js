@@ -16,7 +16,7 @@ window.onload = function () {
      * @param drawAdditional An optional function that draws anything extra
      * after we've drawn everything else
      */
-    const drawScene = function (drawAdditional) {
+    const drawScene = function (timeStamp, drawAdditional) {
         const canvas = document.getElementById('myCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -59,7 +59,13 @@ window.onload = function () {
 
             let animationState = 'move-up';
             animate = true;
-            const update = function () {
+            let lastFrame = null;
+            const update = function (timestamp) {
+                let delta = 0;
+                const movementSpeed = speed * 5;
+                if (lastFrame && timestamp) {
+                    delta = (timestamp - lastFrame) / 100;
+                }
                 if (cancel) {
                     // we've been cancelled, don't bother animating anything else
                     otherPeg.pushDisk(disk);
@@ -68,7 +74,7 @@ window.onload = function () {
                     return;
                 }
                 if (animationState === 'move-up') {
-                    disk.yPos -= speed;
+                    disk.yPos -= movementSpeed * delta;
                     if (disk.yPos <= 50) {
                         disk.yPos = 50;
                         // finished moving up, now move across
@@ -76,12 +82,12 @@ window.onload = function () {
                     }
                 } else if (animationState === 'move-across') {
                     if (disk.xPos < otherPeg.xPos) {
-                        disk.xPos += speed;
+                        disk.xPos += movementSpeed * delta;
                     }
                     if (disk.xPos > otherPeg.xPos) {
-                        disk.xPos -= speed;
+                        disk.xPos -= movementSpeed * delta;
                     }
-                    if ((disk.xPos > (otherPeg.xPos - speed)) && (disk.xPos < (otherPeg.xPos + speed))) {
+                    if ((disk.xPos > (otherPeg.xPos - (movementSpeed * delta))) && (disk.xPos < (otherPeg.xPos + (movementSpeed * delta)))) {
                         disk.xPos = otherPeg.xPos;
                         // finished moving across, now move down
                         animationState = 'move-down';
@@ -92,7 +98,7 @@ window.onload = function () {
                         yPosTarget = otherPeg.disks[otherPeg.disks.length - 1].yPos - 20;
                     }
                     if (disk.yPos < yPosTarget) {
-                        disk.yPos += speed;
+                        disk.yPos += movementSpeed * delta;
                     }
                     if (disk.yPos >= yPosTarget) {
                         // finished moving down, disk should be where it needs to be now
@@ -106,10 +112,11 @@ window.onload = function () {
                     return;
                 }
 
-                drawScene(function (ctx) {
+                drawScene(null, function (ctx) {
                     disk.draw(ctx);
                 });
 
+                lastFrame = timestamp;
                 if (animate) {
                     window.requestAnimationFrame(update);
                 }
