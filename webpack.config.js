@@ -6,6 +6,10 @@ const postCssPresetEnv = require('postcss-preset-env');
 module.exports = {
     'devtool': 'inline-source-map',
     'entry': {
+        'graph-traversal': [
+            'regenerator-runtime/runtime',
+            './src/graph-traversal/script.js'
+        ],
         'home': ['./src/script.js'],
         'tower-of-hanoi': [
             'regenerator-runtime/runtime',
@@ -60,6 +64,12 @@ module.exports = {
         'filename': '[name].bundle.js'
     },
     'plugins': [
+        new HtmlWebpackPlugin({
+            'chunks': ['graph-traversal'],
+            'filename': 'graph-traversal/index.html',
+            'hash': true,
+            'template': 'src/graph-traversal/index.html'
+        }),
         new HtmlWebpackPlugin({
             'chunks': ['home'],
             'filename': 'index.html',
