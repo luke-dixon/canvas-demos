@@ -1,7 +1,5 @@
 /* eslint-env node */
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const postCssImport = require('postcss-import');
-const postCssPresetEnv = require('postcss-preset-env');
 
 module.exports = {
     'devtool': 'inline-source-map',
@@ -24,14 +22,7 @@ module.exports = {
                         'options': {'importLoaders': 1}
                     },
                     {
-                        'loader': 'postcss-loader',
-                        'options': {
-                            'ident': 'postcss',
-                            'plugins': () => [
-                                postCssImport,
-                                postCssPresetEnv
-                            ]
-                        }
+                        'loader': 'postcss-loader'
                     }
                 ]
             },
