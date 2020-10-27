@@ -39,12 +39,116 @@ window.onload = function () {
         }
     };
 
+    class MoveUpState {
+        constructor(mover) {
+            this.mover = mover;
+            this.movementSpeed = speed * 5;
+        }
+
+        get finished() {
+            return false;
+        }
+
+        move(delta) {
+            this.mover.disk.yPos -= this.movementSpeed * delta;
+        }
+
+        next() {
+            if (this.mover.disk.yPos <= 50) {
+                this.mover.disk.yPos = 50;
+                return new MoveAcrossState(this.mover);
+            } else {
+                return new MoveUpState(this.mover);
+            }
+        }
+    }
+
+    class MoveAcrossState {
+        constructor(mover) {
+            this.mover = mover;
+            this.movementSpeed = speed * 5;
+        }
+
+        get finished() {
+            return false;
+        }
+
+        move(delta) {
+            if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
+                this.mover.disk.xPos += this.movementSpeed * delta;
+                if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
+                    this.mover.disk.xPos = this.mover.toPeg.xPos;
+                }
+            }
+            else if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
+                this.mover.disk.xPos -= this.movementSpeed * delta;
+                if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
+                    this.mover.disk.xPos = this.mover.toPeg.xPos;
+                }
+            }
+        }
+
+        next() {
+            if (this.mover.disk.xPos === this.mover.toPeg.xPos) {
+                return new MoveDownState(this.mover);
+            } else {
+                return new MoveAcrossState(this.mover);
+            }
+        }
+    }
+
+    class MoveDownState {
+        constructor(mover) {
+            this.mover = mover;
+            this.movementSpeed = speed * 5;
+            if (this.mover.toPeg.disks.length > 0) {
+                this.yPosTarget = this.mover.toPeg.disks[this.mover.toPeg.disks.length - 1].yPos - 20;
+            } else {
+                this.yPosTarget = 230;
+            }
+        }
+
+        get finished() {
+            return false;
+        }
+
+        move(delta) {
+            if (this.mover.disk.yPos < this.yPosTarget) {
+                this.mover.disk.yPos += this.movementSpeed * delta;
+                if (this.mover.disk.yPos >= this.yPosTarget) {
+                    this.mover.disk.yPos = this.yPosTarget;
+                }
+            }
+        }
+
+        next() {
+            if (this.mover.disk.yPos === this.yPosTarget) {
+                return new FinishedState(this.mover);
+            } else {
+                return new MoveDownState(this.mover);
+            }
+        }
+    }
+
+    class FinishedState {
+        constructor(mover) {
+            this.mover = mover;
+        }
+
+        get finished() {
+            return true;
+        }
+
+        move(delta) {}
+        next() {}
+    }
+
     class DiskMover {
         constructor(fromPeg, toPeg) {
             this.fromPeg = fromPeg;
             this.toPeg = toPeg;
             this.lastFrame = null;
-            this.animationState = 'move-up';
+            this.animationState = new MoveUpState(this);
             this.disk = null;
             this.finishedCallback = null;
         }
@@ -73,52 +177,24 @@ window.onload = function () {
                 this.finishedCallback();
                 return;
             }
-            if (this.animationState === 'move-up') {
-                this.disk.yPos -= movementSpeed * delta;
-                if (this.disk.yPos <= 50) {
-                    this.disk.yPos = 50;
-                    // finished moving up, now move across
-                    this.animationState = 'move-across';
-                }
-            } else if (this.animationState === 'move-across') {
-                if (this.disk.xPos < this.toPeg.xPos) {
-                    this.disk.xPos += movementSpeed * delta;
-                }
-                if (this.disk.xPos > this.toPeg.xPos) {
-                    this.disk.xPos -= movementSpeed * delta;
-                }
-                if ((this.disk.xPos > (this.toPeg.xPos - (movementSpeed * delta))) && (this.disk.xPos < (this.toPeg.xPos + (movementSpeed * delta)))) {
-                    this.disk.xPos = this.toPeg.xPos;
-                    // finished moving across, now move down
-                    this.animationState = 'move-down';
-                }
-            } else if (this.animationState === 'move-down') {
-                let yPosTarget = 230;
-                if (this.toPeg.disks.length > 0) {
-                    yPosTarget = this.toPeg.disks[this.toPeg.disks.length - 1].yPos - 20;
-                }
-                if (this.disk.yPos < yPosTarget) {
-                    this.disk.yPos += movementSpeed * delta;
-                }
-                if (this.disk.yPos >= yPosTarget) {
-                    // finished moving down, disk should be where it needs to be now
-                    this.disk.yPos = yPosTarget;
-                    this.animationState = 'finished';
-                }
-            } else if (this.animationState === 'finished') {
+
+            this.animationState.move(delta);
+            this.animationState = this.animationState.next();
+
+            if (this.animationState.finished) {
                 this.toPeg.pushDisk(this.disk);
                 animate = false;
                 this.finishedCallback();
-                return;
-            }
+            } else {
 
-            drawScene(null, (ctx) => {
-                this.disk.draw(ctx);
-            });
+                drawScene(null, (ctx) => {
+                    this.disk.draw(ctx);
+                });
 
-            this.lastFrame = timestamp;
-            if (animate) {
-                window.requestAnimationFrame((timestamp) => this.update(timestamp));
+                this.lastFrame = timestamp;
+                if (animate) {
+                    window.requestAnimationFrame((timestamp) => this.update(timestamp));
+                }
             }
         }
     }
