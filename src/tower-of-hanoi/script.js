@@ -142,7 +142,6 @@ window.onload = function () {
                 if (task.done) {
                     // we're finished now
                     window.requestAnimationFrame(drawScene);
-                    animateButton.disabled = false;
                     currentAnimationText.replaceChild(document.createTextNode('All finished. Press reset to start over:'), currentAnimationText.lastChild);
                     if (cancel) {
                         cancel = false;
