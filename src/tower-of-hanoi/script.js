@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime';
-import {Disk} from './disk.js';
+import {Disk} from './disk';
+import {Peg} from './peg';
 import {solve} from './algorithm';
 import {styles} from './style.css'; // eslint-disable-line no-unused-vars
 
@@ -38,130 +39,87 @@ window.onload = function () {
         }
     };
 
-    /**
-     * This class represents a peg used in the Tower of Hanoi puzzle.
-     */
-    class Peg {
-        constructor(name, xPosInitial, yPosInitial, disks) {
-            this.name = name;
-            this.xPos = xPosInitial;
-            this.yPos = yPosInitial;
-            this.disks = disks;
-            this.width = 40;
-            this.height = 130;
+    class DiskMover {
+        constructor(fromPeg, toPeg) {
+            this.fromPeg = fromPeg;
+            this.toPeg = toPeg;
+            this.lastFrame = null;
+            this.animationState = 'move-up';
+            this.disk = null;
+            this.finishedCallback = null;
         }
-
-        moveTopDiskTo(otherPeg, finishedCallback) {
-            const disk = this.disks.pop();
+        move(finishedCallback) {
+            this.finishedCallback = finishedCallback;
+            this.disk = this.fromPeg.disks.pop();
             if (!cancel) {
-                currentAnimationText.replaceChild(document.createTextNode('Moving ' + disk.color + ' disk from ' + this.name + ' to ' + otherPeg.name), currentAnimationText.lastChild);
+                currentAnimationText.replaceChild(
+                    document.createTextNode('Moving ' + this.disk.color + ' disk from ' + this.fromPeg.name + ' to ' + this.toPeg.name), currentAnimationText.lastChild);
             }
-
-            let animationState = 'move-up';
             animate = true;
-            let lastFrame = null;
-            const update = function (timestamp) {
-                let delta = 0;
-                const movementSpeed = speed * 5;
-                if (lastFrame && timestamp) {
-                    delta = (timestamp - lastFrame) / 100;
-                }
-                if (cancel) {
-                    // we've been cancelled, don't bother animating anything else
-                    otherPeg.pushDisk(disk);
-                    animate = false;
-                    finishedCallback();
-                    return;
-                }
-                if (animationState === 'move-up') {
-                    disk.yPos -= movementSpeed * delta;
-                    if (disk.yPos <= 50) {
-                        disk.yPos = 50;
-                        // finished moving up, now move across
-                        animationState = 'move-across';
-                    }
-                } else if (animationState === 'move-across') {
-                    if (disk.xPos < otherPeg.xPos) {
-                        disk.xPos += movementSpeed * delta;
-                    }
-                    if (disk.xPos > otherPeg.xPos) {
-                        disk.xPos -= movementSpeed * delta;
-                    }
-                    if ((disk.xPos > (otherPeg.xPos - (movementSpeed * delta))) && (disk.xPos < (otherPeg.xPos + (movementSpeed * delta)))) {
-                        disk.xPos = otherPeg.xPos;
-                        // finished moving across, now move down
-                        animationState = 'move-down';
-                    }
-                } else if (animationState === 'move-down') {
-                    let yPosTarget = 230;
-                    if (otherPeg.disks.length > 0) {
-                        yPosTarget = otherPeg.disks[otherPeg.disks.length - 1].yPos - 20;
-                    }
-                    if (disk.yPos < yPosTarget) {
-                        disk.yPos += movementSpeed * delta;
-                    }
-                    if (disk.yPos >= yPosTarget) {
-                        // finished moving down, disk should be where it needs to be now
-                        disk.yPos = yPosTarget;
-                        animationState = 'finished';
-                    }
-                } else if (animationState === 'finished') {
-                    otherPeg.pushDisk(disk);
-                    animate = false;
-                    finishedCallback();
-                    return;
-                }
-
-                drawScene(null, function (ctx) {
-                    disk.draw(ctx);
-                });
-
-                lastFrame = timestamp;
-                if (animate) {
-                    window.requestAnimationFrame(update);
-                }
-            };
             if (!cancel) {
-                window.requestAnimationFrame(update);
+                window.requestAnimationFrame((timestamp) => this.update(timestamp));
             }
         }
-
-        pushDisk(disk) {
-            if (this.disks.length > 0) {
-                disk.yPos = this.disks[this.disks.length - 1].yPos - 20;
-            } else {
-                disk.yPos = 230;
+        update(timestamp) {
+            let delta = 0;
+            const movementSpeed = speed * 5;
+            if (this.lastFrame && timestamp) {
+                delta = (timestamp - this.lastFrame) / 100;
             }
-            this.disks.push(disk);
-            disk.xPos = this.xPos;
-        }
+            if (cancel) {
+                // we've been cancelled, don't bother animating anything else
+                this.toPeg.pushDisk(this.disk);
+                animate = false;
+                this.finishedCallback();
+                return;
+            }
+            if (this.animationState === 'move-up') {
+                this.disk.yPos -= movementSpeed * delta;
+                if (this.disk.yPos <= 50) {
+                    this.disk.yPos = 50;
+                    // finished moving up, now move across
+                    this.animationState = 'move-across';
+                }
+            } else if (this.animationState === 'move-across') {
+                if (this.disk.xPos < this.toPeg.xPos) {
+                    this.disk.xPos += movementSpeed * delta;
+                }
+                if (this.disk.xPos > this.toPeg.xPos) {
+                    this.disk.xPos -= movementSpeed * delta;
+                }
+                if ((this.disk.xPos > (this.toPeg.xPos - (movementSpeed * delta))) && (this.disk.xPos < (this.toPeg.xPos + (movementSpeed * delta)))) {
+                    this.disk.xPos = this.toPeg.xPos;
+                    // finished moving across, now move down
+                    this.animationState = 'move-down';
+                }
+            } else if (this.animationState === 'move-down') {
+                let yPosTarget = 230;
+                if (this.toPeg.disks.length > 0) {
+                    yPosTarget = this.toPeg.disks[this.toPeg.disks.length - 1].yPos - 20;
+                }
+                if (this.disk.yPos < yPosTarget) {
+                    this.disk.yPos += movementSpeed * delta;
+                }
+                if (this.disk.yPos >= yPosTarget) {
+                    // finished moving down, disk should be where it needs to be now
+                    this.disk.yPos = yPosTarget;
+                    this.animationState = 'finished';
+                }
+            } else if (this.animationState === 'finished') {
+                this.toPeg.pushDisk(this.disk);
+                animate = false;
+                this.finishedCallback();
+                return;
+            }
 
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.lineCap = 'square';
-            ctx.strokeStyle = 'brown';
-            ctx.lineWidth = 5;
-            ctx.moveTo(this.xPos, this.yPos);
-            ctx.stroke();
-            ctx.moveTo(this.xPos, this.yPos);
-            ctx.lineTo(this.xPos - this.width, this.yPos);
-            ctx.stroke();
-            ctx.moveTo(this.xPos, this.yPos);
-            ctx.lineTo(this.xPos + this.width, this.yPos);
-            ctx.stroke();
-            ctx.moveTo(this.xPos, this.yPos);
-            ctx.lineTo(this.xPos, this.yPos - this.height);
-            ctx.stroke();
-
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 1;
-            ctx.textAlign = 'center';
-            ctx.font = '24px sans-serif';
-            ctx.fillText(this.name, this.xPos, this.yPos + 35);
-
-            this.disks.forEach(function (disk) {
-                disk.draw(ctx);
+            drawScene(null, (ctx) => {
+                this.disk.draw(ctx);
             });
+
+            this.lastFrame = timestamp;
+            if (animate) {
+                window.requestAnimationFrame((timestamp) => this.update(timestamp));
+            }
         }
     }
 
@@ -213,9 +171,10 @@ window.onload = function () {
                     const fromPeg = task.value.source;
                     const toPeg = task.value.target;
 
-                    fromPeg.moveTopDiskTo(toPeg, function () {
+                    const diskMover = new DiskMover(fromPeg, toPeg);
+                    diskMover.move(function () {
                         callTask(cancel, gen.next());
-                    });
+                    })
                 }
             };
 
