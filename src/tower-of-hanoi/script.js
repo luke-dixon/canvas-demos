@@ -2,6 +2,7 @@ import 'regenerator-runtime/runtime';
 import {Disk} from './disk';
 import {Peg} from './peg';
 import {solve} from './algorithm';
+import {InitialState, FinishedState} from './animationState';
 import {styles} from './style.css'; // eslint-disable-line no-unused-vars
 
 window.onload = function () {
@@ -9,7 +10,9 @@ window.onload = function () {
     let animate = false;
     let cancel = false;
     let speed = 1;
+    const speedChangedEvent = new Event('speedChanged');
     let pegs = [];
+    let diskMover = null;
 
     /**
      * Draws the scene.
@@ -39,119 +42,21 @@ window.onload = function () {
         }
     };
 
-    class MoveUpState {
-        constructor(mover) {
-            this.mover = mover;
-            this.movementSpeed = speed * 5;
-        }
-
-        get finished() {
-            return false;
-        }
-
-        move(delta) {
-            this.mover.disk.yPos -= this.movementSpeed * delta;
-        }
-
-        next() {
-            if (this.mover.disk.yPos <= 50) {
-                this.mover.disk.yPos = 50;
-                return new MoveAcrossState(this.mover);
-            } else {
-                return new MoveUpState(this.mover);
-            }
-        }
-    }
-
-    class MoveAcrossState {
-        constructor(mover) {
-            this.mover = mover;
-            this.movementSpeed = speed * 5;
-        }
-
-        get finished() {
-            return false;
-        }
-
-        move(delta) {
-            if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
-                this.mover.disk.xPos += this.movementSpeed * delta;
-                if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
-                    this.mover.disk.xPos = this.mover.toPeg.xPos;
-                }
-            }
-            else if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
-                this.mover.disk.xPos -= this.movementSpeed * delta;
-                if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
-                    this.mover.disk.xPos = this.mover.toPeg.xPos;
-                }
-            }
-        }
-
-        next() {
-            if (this.mover.disk.xPos === this.mover.toPeg.xPos) {
-                return new MoveDownState(this.mover);
-            } else {
-                return new MoveAcrossState(this.mover);
-            }
-        }
-    }
-
-    class MoveDownState {
-        constructor(mover) {
-            this.mover = mover;
-            this.movementSpeed = speed * 5;
-            if (this.mover.toPeg.disks.length > 0) {
-                this.yPosTarget = this.mover.toPeg.disks[this.mover.toPeg.disks.length - 1].yPos - 20;
-            } else {
-                this.yPosTarget = 230;
-            }
-        }
-
-        get finished() {
-            return false;
-        }
-
-        move(delta) {
-            if (this.mover.disk.yPos < this.yPosTarget) {
-                this.mover.disk.yPos += this.movementSpeed * delta;
-                if (this.mover.disk.yPos >= this.yPosTarget) {
-                    this.mover.disk.yPos = this.yPosTarget;
-                }
-            }
-        }
-
-        next() {
-            if (this.mover.disk.yPos === this.yPosTarget) {
-                return new FinishedState(this.mover);
-            } else {
-                return new MoveDownState(this.mover);
-            }
-        }
-    }
-
-    class FinishedState {
-        constructor(mover) {
-            this.mover = mover;
-        }
-
-        get finished() {
-            return true;
-        }
-
-        move(delta) {}
-        next() {}
-    }
-
     class DiskMover {
         constructor(fromPeg, toPeg) {
+            this.speedMultiplier = 5;
             this.fromPeg = fromPeg;
             this.toPeg = toPeg;
             this.lastFrame = null;
-            this.animationState = new MoveUpState(this);
+            this.animationState = new InitialState(this, speed * this.speedMultiplier);
             this.disk = null;
             this.finishedCallback = null;
         }
+
+        set speed(value) {
+            this.animationState.speed = value * this.speedMultiplier;
+        }
+
         move(finishedCallback) {
             this.finishedCallback = finishedCallback;
             this.disk = this.fromPeg.disks.pop();
@@ -164,18 +69,19 @@ window.onload = function () {
                 window.requestAnimationFrame((timestamp) => this.update(timestamp));
             }
         }
+
+        cancel() {
+            animate = false;
+            this.animationState = new FinishedState(this.mover, speed * 5);
+            if (this.disk) {
+                this.toPeg.pushDisk(this.disk);
+            }
+        }
+
         update(timestamp) {
             let delta = 0;
-            const movementSpeed = speed * 5;
             if (this.lastFrame && timestamp) {
                 delta = (timestamp - this.lastFrame) / 100;
-            }
-            if (cancel) {
-                // we've been cancelled, don't bother animating anything else
-                this.toPeg.pushDisk(this.disk);
-                animate = false;
-                this.finishedCallback();
-                return;
             }
 
             this.animationState.move(delta);
@@ -247,7 +153,7 @@ window.onload = function () {
                     const fromPeg = task.value.source;
                     const toPeg = task.value.target;
 
-                    const diskMover = new DiskMover(fromPeg, toPeg);
+                    diskMover = new DiskMover(fromPeg, toPeg);
                     diskMover.move(function () {
                         callTask(cancel, gen.next());
                     })
@@ -262,23 +168,32 @@ window.onload = function () {
         resetButton.addEventListener('click', function () {
             cancel = true;
             currentAnimationText.replaceChild(document.createTextNode('Resetting'), currentAnimationText.lastChild);
-            setTimeout(function () {
-                animateButton.disabled = false;
+            if (diskMover) {
+                diskMover.cancel();
+                window.requestAnimationFrame(() => {
+                    animateButton.disabled = false;
 
-                currentAnimationText.replaceChild(document.createTextNode('Press the Go button to begin:'), currentAnimationText.lastChild);
-                initializePegs();
+                    currentAnimationText.replaceChild(document.createTextNode('Press the Go button to begin:'), currentAnimationText.lastChild);
+                    initializePegs();
 
-                // draw one frame after a reset
-                window.requestAnimationFrame(drawScene);
-                cancel = false;
-            }, 1000);
+                    // draw one frame after a reset
+                    window.requestAnimationFrame(drawScene);
+                    cancel = false;
+                });
+            }
         });
 
         const speedSlider = document.getElementById('speedSlider');
         speedSlider.oninput = function () {
             speed = parseInt(speedSlider.value, 10);
+            if (diskMover) {
+                diskMover.speed = speed;
+            }
         };
         speed = parseInt(speedSlider.value, 10);
+        if (diskMover) {
+            diskMover.speed = speed;
+        }
 
         // draw one frame to begin with
         window.requestAnimationFrame(drawScene);
