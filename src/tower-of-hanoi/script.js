@@ -1,8 +1,8 @@
 import 'regenerator-runtime/runtime';
+import {FinishedState, InitialState} from './animationState';
 import {Disk} from './disk';
 import {Peg} from './peg';
 import {solve} from './algorithm';
-import {InitialState, FinishedState} from './animationState';
 import {styles} from './style.css'; // eslint-disable-line no-unused-vars
 
 window.onload = function () {
@@ -10,7 +10,6 @@ window.onload = function () {
     let animate = false;
     let cancel = false;
     let speed = 1;
-    const speedChangedEvent = new Event('speedChanged');
     let pegs = [];
     let diskMover = null;
 
@@ -53,6 +52,10 @@ window.onload = function () {
             this.finishedCallback = null;
         }
 
+        get speed() {
+            return this.animationState.speed;
+        }
+
         set speed(value) {
             this.animationState.speed = value * this.speedMultiplier;
         }
@@ -61,8 +64,7 @@ window.onload = function () {
             this.finishedCallback = finishedCallback;
             this.disk = this.fromPeg.disks.pop();
             if (!cancel) {
-                currentAnimationText.replaceChild(
-                    document.createTextNode('Moving ' + this.disk.color + ' disk from ' + this.fromPeg.name + ' to ' + this.toPeg.name), currentAnimationText.lastChild);
+                currentAnimationText.replaceChild(document.createTextNode('Moving ' + this.disk.color + ' disk from ' + this.fromPeg.name + ' to ' + this.toPeg.name), currentAnimationText.lastChild);
             }
             animate = true;
             if (!cancel) {
@@ -99,7 +101,7 @@ window.onload = function () {
 
                 this.lastFrame = timestamp;
                 if (animate) {
-                    window.requestAnimationFrame((timestamp) => this.update(timestamp));
+                    window.requestAnimationFrame((ts) => this.update(ts));
                 }
             }
         }

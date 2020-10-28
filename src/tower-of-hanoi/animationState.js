@@ -2,53 +2,22 @@ class State {
     constructor(mover, speed) {
         this.mover = mover;
         this.speed = speed;
+        this.finished = false;
     }
 
-    get finished() {
-        return false;
-    }
-
-    move(delta) {}
-    next() {}
-}
-
-class MoveUpState extends State {
-    move(delta) {
-        this.mover.disk.yPos -= this.speed * delta;
+    move(delta) { // eslint-disable-line no-unused-vars
+        throw new Error('Override this method');
     }
 
     next() {
-        if (this.mover.disk.yPos <= 50) {
-            this.mover.disk.yPos = 50;
-            return new MoveAcrossState(this.mover, this.speed);
-        } else {
-            return this;
-        }
+        return this;
     }
 }
 
-class MoveAcrossState extends State {
-    move(delta) {
-        if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
-            this.mover.disk.xPos += this.speed * delta;
-            if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
-                this.mover.disk.xPos = this.mover.toPeg.xPos;
-            }
-        }
-        else if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
-            this.mover.disk.xPos -= this.speed * delta;
-            if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
-                this.mover.disk.xPos = this.mover.toPeg.xPos;
-            }
-        }
-    }
-
-    next() {
-        if (this.mover.disk.xPos === this.mover.toPeg.xPos) {
-            return new MoveDownState(this.mover, this.speed);
-        } else {
-            return this;
-        }
+export class FinishedState extends State {
+    constructor(mover, speed) {
+        super(mover, speed);
+        this.finished = true;
     }
 }
 
@@ -74,19 +43,44 @@ class MoveDownState extends State {
     next() {
         if (this.mover.disk.yPos === this.yPosTarget) {
             return new FinishedState(this.mover, this.speed);
-        } else {
-            return this;
         }
+        return this;
     }
 }
 
-export class FinishedState {
-    get finished() {
-        return true;
+class MoveAcrossState extends State {
+    move(delta) {
+        if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
+            this.mover.disk.xPos += this.speed * delta;
+            if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
+                this.mover.disk.xPos = this.mover.toPeg.xPos;
+            }
+        } else if (this.mover.disk.xPos > this.mover.toPeg.xPos) {
+            this.mover.disk.xPos -= this.speed * delta;
+            if (this.mover.disk.xPos < this.mover.toPeg.xPos) {
+                this.mover.disk.xPos = this.mover.toPeg.xPos;
+            }
+        }
     }
 
-    move(delta) {}
     next() {
+        if (this.mover.disk.xPos === this.mover.toPeg.xPos) {
+            return new MoveDownState(this.mover, this.speed);
+        }
+        return this;
+    }
+}
+
+class MoveUpState extends State {
+    move(delta) {
+        this.mover.disk.yPos -= this.speed * delta;
+    }
+
+    next() {
+        if (this.mover.disk.yPos <= 50) {
+            this.mover.disk.yPos = 50;
+            return new MoveAcrossState(this.mover, this.speed);
+        }
         return this;
     }
 }
