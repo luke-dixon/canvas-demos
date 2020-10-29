@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --mode=development",
     "build-production": "webpack --mode=production",
-    "ci-test": "karma start --browsers Firefox --single-run",
+    "ci-test": "karma start --browsers FirefoxHeadless --single-run",
     "lint": "eslint *.js; eslint src; eslint spec",
     "start": "webpack-dev-server --open",
     "test": "karma start --single-run",
