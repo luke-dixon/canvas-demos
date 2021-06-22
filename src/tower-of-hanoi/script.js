@@ -3,7 +3,8 @@ import {FinishedState, InitialState} from './animationState';
 import {Disk} from './disk';
 import {Peg} from './peg';
 import {solve} from './algorithm';
-import {styles} from './style.css'; // eslint-disable-line no-unused-vars
+import {styles} from './style.css';
+import {drawDisk, drawPeg} from "./draw"; // eslint-disable-line no-unused-vars
 
 window.onload = function () {
     const currentAnimationText = document.getElementById('currentAnimationText');
@@ -30,7 +31,7 @@ window.onload = function () {
         // Each peg's draw function draws the pegs also
         pegs.forEach(function (peg) {
             ctx.save();
-            peg.draw(ctx);
+            drawPeg(ctx, peg);
             ctx.restore();
         });
 
@@ -96,7 +97,7 @@ window.onload = function () {
             } else {
 
                 drawScene(null, (ctx) => {
-                    this.disk.draw(ctx);
+                    drawDisk(ctx, this.disk);
                 });
 
                 this.lastFrame = timestamp;
