@@ -182,6 +182,12 @@ window.onload = function () {
                     window.requestAnimationFrame(drawScene);
                     cancel = false;
                 });
+            } else {
+                window.requestAnimationFrame(() => {
+                    currentAnimationText.replaceChild(document.createTextNode('Press the Go button to begin:'), currentAnimationText.lastChild);
+                    window.requestAnimationFrame(drawScene);
+                    cancel = false;
+                });
             }
         });
 

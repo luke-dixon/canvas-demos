@@ -19,6 +19,8 @@ export class FinishedState extends State {
         super(mover, speed);
         this.finished = true;
     }
+
+    move(delta) {}
 }
 
 class MoveDownState extends State {
