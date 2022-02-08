@@ -20,7 +20,7 @@ export class FinishedState extends State {
         this.finished = true;
     }
 
-    move(delta) {}
+    move() {}
 }
 
 class MoveDownState extends State {

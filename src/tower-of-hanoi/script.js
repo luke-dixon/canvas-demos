@@ -3,8 +3,8 @@ import {FinishedState, InitialState} from './animationState';
 import {Disk} from './disk';
 import {Peg} from './peg';
 import {solve} from './algorithm';
-import {styles} from './style.css';
-import {drawDisk, drawPeg} from "./draw"; // eslint-disable-line no-unused-vars
+import {styles} from './style.css'; // eslint-disable-line no-unused-vars
+import {drawDisk, drawPeg} from "./draw";
 
 window.onload = function () {
     const currentAnimationText = document.getElementById('currentAnimationText');

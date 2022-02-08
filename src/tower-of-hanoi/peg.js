@@ -1,7 +1,6 @@
 /**
  * This class represents a peg used in the Tower of Hanoi puzzle.
  */
-import {drawDisk} from "./draw";
 
 export class Peg {
     constructor(name, xPosInitial, yPosInitial, disks) {
