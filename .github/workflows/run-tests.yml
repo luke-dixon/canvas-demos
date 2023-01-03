@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install browser
-        run: sudo apt-get install firefox
+        run: sudo apt-get install chromium-chromedriver
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
