@@ -1,6 +1,6 @@
 /* eslint-env node */
-const postcssPresetEnv = require('postcss-preset-env');
+import postcssPresetEnv from "postcss-preset-env";
 
-module.exports = {
+export default {
     'plugins': [postcssPresetEnv()]
 };

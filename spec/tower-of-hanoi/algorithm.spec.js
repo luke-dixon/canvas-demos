@@ -22,6 +22,7 @@ describe('The recursive algorithm for solving the tower of hanoi problem', funct
         const gen = solve(0, sourcePeg, targetPeg, sparePeg);
 
         const task = gen.next();
+
         expect(task.done).toBeTruthy();
         expect(task.value).toBeUndefined();
     });

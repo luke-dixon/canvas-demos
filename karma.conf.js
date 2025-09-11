@@ -1,9 +1,8 @@
 /* eslint-env node */
 // Karma configuration
-// Generated on Mon Apr 22 2019 17:20:48 GMT+0100 (BST)
-const webpackConfig = require('./webpack.config');
+import webpackConfig from "./webpack.config.js";
 
-module.exports = function(config) {
+export default function(config) {
     config.set({
 
         // enable / disable watching file and executing tests whenever any file changes

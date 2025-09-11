@@ -1,7 +1,7 @@
 /* eslint-env node */
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import HtmlWebpackPlugin from "html-webpack-plugin";
 
-module.exports = {
+export default {
     'devtool': 'inline-source-map',
     'entry': {
         'home': ['./src/script.js'],
