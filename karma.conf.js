@@ -1,4 +1,3 @@
-/* eslint-env node */
 // Karma configuration
 import webpackConfig from "./webpack.config.js";
 

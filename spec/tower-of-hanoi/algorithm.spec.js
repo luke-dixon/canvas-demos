@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 import 'regenerator-runtime/runtime';
 import {solve} from '../../src/tower-of-hanoi/algorithm';
 
@@ -31,7 +30,7 @@ describe('The recursive algorithm for solving the tower of hanoi problem', funct
         const tasks = [];
         const gen = solve(1, sourcePeg, targetPeg, sparePeg);
 
-        let task = null;
+        let task;
         do {
             task = gen.next();
             if (task.value) {
@@ -50,7 +49,7 @@ describe('The recursive algorithm for solving the tower of hanoi problem', funct
         const tasks = [];
         const gen = solve(2, sourcePeg, targetPeg, sparePeg);
 
-        let task = null;
+        let task;
         do {
             task = gen.next();
             if (task.value) {

@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 import {Disk} from '../../src/tower-of-hanoi/disk';
 
 describe('A disk', function () {
